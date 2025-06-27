@@ -29,9 +29,19 @@ def naver_blog_crawler(task_id, query, click_count):
         options.add_argument("--no-sandbox")
         options.add_argument("--disable-dev-shm-usage")
         options.add_argument("--disable-gpu")
+        
+        # === ★★★ 메모리 최적화를 위한 옵션 추가 ★★★ ===
+        # 이미지를 불러오지 않도록 설정하여 메모리 사용량을 대폭 줄입니다.
+        options.add_argument("--disable-images")
+        options.add_experimental_option("prefs", {"profile.managed_default_content_settings.images": 2})
+        # ===============================================
+
         options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36")
         
         driver = webdriver.Chrome(service=Service(), options=options)
+        # 페이지 로드 타임아웃을 30초로 설정합니다. 페이지가 30초 안에 로드되지 않으면 오류를 발생시킵니다.
+        driver.set_page_load_timeout(30)
+        
         driver.get(URL)
         time.sleep(2)
 
@@ -43,7 +53,6 @@ def naver_blog_crawler(task_id, query, click_count):
             except NoSuchElementException:
                 break
         
-        # === ★★★ 로직 변경 지점 1: 링크만 먼저 모두 수집 ★★★ ===
         posts = driver.find_elements(By.CSS_SELECTOR, "li.bx")
         links_to_visit = []
         for post in posts:
@@ -51,28 +60,24 @@ def naver_blog_crawler(task_id, query, click_count):
                 link = post.find_element(By.CSS_SELECTOR, 'a.title_link').get_attribute('href')
                 links_to_visit.append(link)
             except NoSuchElementException:
-                continue # 링크가 없는 광고 등은 건너뛰기
+                continue
 
         print(f"[작업 ID: {task_id}] 총 {len(links_to_visit)}개의 블로그 링크 수집 완료. 본문 확인을 시작합니다.")
 
-        # === ★★★ 로직 변경 지점 2: 수집된 링크를 순회하며, 같은 탭에서 내용 확인 ★★★ ===
         results = []
         for link in links_to_visit:
             try:
-                # 새 탭을 열지 않고, 현재 탭에서 바로 링크로 이동합니다.
                 driver.get(link)
-                time.sleep(2) # 페이지 로딩 대기
+                # time.sleep(2) # 페이지 로드 타임아웃을 설정했으므로, 고정 대기는 줄여도 됩니다.
 
-                # 블로그 본문이 담긴 iframe으로 전환 시도
                 try:
                     driver.switch_to.frame('mainFrame')
                 except: pass
                 
                 body_content = driver.find_element(By.CSS_SELECTOR, 'body').text
                 
-                # 원래의 제목을 가져오기 위해 다시 원래 프레임으로 돌아옵니다.
                 driver.switch_to.default_content()
-                title = driver.title # 페이지의 title 태그를 제목으로 사용
+                title = driver.title 
                 
                 is_ad = any(word in body_content for word in FORBIDDEN_WORDS)
                 
@@ -119,6 +124,7 @@ def get_result_api(task_id):
     if not task:
         return jsonify({'status': 'error', 'message': 'task_id not found'}), 404
     return jsonify(task)
+
 
 
 # --- 로컬 테스트용 실행 코드 (이전과 동일) ---
