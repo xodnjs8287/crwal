@@ -17,13 +17,14 @@ app.use(express.static(path.join(__dirname, 'public')));
 io.on('connection', (socket) => {
     console.log('✅ a user connected');
 
-    // 사용자 접속을 모든 클라이언트에게 알림
-    io.emit('chat message', 'A new user has joined the chat.');
+    // 사용자 접속을 모든 클라이언트에게 알림 (한글로 변경)
+    io.emit('chat message', '새로운 사용자가 입장했습니다.');
 
     // 사용자가 연결을 끊었을 때의 처리
     socket.on('disconnect', () => {
         console.log('❌ user disconnected');
-        io.emit('chat message', 'A user has left the chat.');
+        // 사용자 퇴장을 모든 클라이언트에게 알림 (한글로 변경)
+        io.emit('chat message', '사용자가 퇴장했습니다.');
     });
 
     // 'chat message' 이벤트를 수신했을 때의 처리
