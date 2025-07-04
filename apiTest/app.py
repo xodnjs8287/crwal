@@ -44,7 +44,7 @@ def naver_blog_crawler(task_id, query, click_count):
         
         driver.get(URL)
         time.sleep(2)
-
+#dd
         # '더보기' 버튼 클릭
         for i in range(click_count):
             try:
