@@ -6,80 +6,164 @@
     <title>Simple Chat</title>
     <style>
         :root {
-            --border-color: #ddd;
             --background-color: #f0f2f5;
-            --body-background: #fff;
+            --container-background: #ffffff;
+            --header-background: #007bff;
+            --system-message-color: #657786;
+            --message-bubble-background: #e9ebee;
             --text-color: #050505;
-            --system-message-color: #888;
+            --border-color: #ced4da;
+            --button-color: #007bff;
+            --button-hover-color: #0056b3;
         }
+
         body {
             margin: 0;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             background-color: var(--background-color);
             display: flex;
-            flex-direction: column;
+            justify-content: center;
+            align-items: center;
             height: 100vh;
         }
+
+        /* 전체 채팅 컨테이너 */
+        .chat-container {
+            width: 100%;
+            max-width: 800px; /* PC에서 최대 너비 제한 */
+            height: 100%;
+            max-height: 90vh; /* PC에서 최대 높이 제한 */
+            display: flex;
+            flex-direction: column;
+            background: var(--container-background);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        /* 헤더 스타일 */
+        .chat-header {
+            background: var(--header-background);
+            color: white;
+            padding: 1rem;
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+
+        /* 메시지 목록 스타일 */
         #messages {
             list-style-type: none;
             margin: 0;
             padding: 1rem;
             flex-grow: 1;
             overflow-y: auto;
-            background-color: var(--body-background);
         }
+
+        /* 웹킷 브라우저용 스크롤바 꾸미기 */
+        #messages::-webkit-scrollbar {
+            width: 8px;
+        }
+        #messages::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        #messages::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 4px;
+        }
+        #messages::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+
+        /* 각 메시지 버블 스타일 */
         #messages > li {
-            padding: 0.5rem 1rem;
+            padding: 0.6rem 1rem;
+            margin-bottom: 0.5rem;
+            border-radius: 18px;
+            max-width: 75%;
             word-wrap: break-word;
+            background: var(--message-bubble-background);
+            color: var(--text-color);
+            width: fit-content; /* 내용물 크기에 맞게 너비 조절 */
         }
-        #messages > li:nth-child(odd) {
-            background: #f9f9f9;
-        }
+
         /* 시스템 메시지 스타일 */
         li.system {
             font-style: italic;
             color: var(--system-message-color);
             text-align: center;
             background: transparent !important;
+            width: 100%;
+            max-width: 100%;
         }
 
+        /* 입력 폼 스타일 */
         #form {
-            background: var(--body-background);
+            background: var(--container-background);
             padding: 1rem;
             display: flex;
-            height: 3rem;
-            box-sizing: border-box;
-            border-top: 1px solid var(--border-color);
+            border-top: 1px solid #e5e5e5;
+            flex-shrink: 0;
         }
+
         #input {
             border: 1px solid var(--border-color);
-            padding: 0 1rem;
+            padding: 0 1.2rem;
             flex-grow: 1;
             border-radius: 2rem;
-            margin-right: 1rem;
+            margin-right: 0.5rem;
+            font-size: 1rem;
+            transition: border-color 0.2s ease-in-out;
         }
+
         #input:focus {
             outline: none;
-            border-color: #007bff;
+            border-color: var(--button-color);
         }
+
         #form > button {
-            background: #007bff;
+            background: var(--button-color);
             border: none;
             padding: 0 1.5rem;
             color: white;
             border-radius: 2rem;
             cursor: pointer;
+            font-size: 1rem;
+            font-weight: bold;
+            transition: background-color 0.2s ease-in-out;
         }
+
         #form > button:hover {
-            background: #0056b3;
+            background: var(--button-hover-color);
+        }
+
+        /* 모바일 화면을 위한 반응형 디자인 */
+        @media (max-width: 600px) {
+            body {
+                align-items: flex-start; /* 모바일에선 상단에 붙임 */
+            }
+            .chat-container {
+                max-width: 100%;
+                max-height: 100%;
+                height: 100vh;
+                border-radius: 0;
+            }
+            #input, #form > button {
+                font-size: 16px; /* 모바일에서 글자 크기가 작아지는 것 방지 */
+            }
         }
     </style>
 </head>
 <body>
-<ul id="messages"></ul>
-<form id="form" action="">
-    <input id="input" autocomplete="off" placeholder="Type a message..." /><button>Send</button>
-</form>
+
+<div class="chat-container">
+    <header class="chat-header">Simple Chat</header>
+    <ul id="messages"></ul>
+    <form id="form" action="">
+        <input id="input" autocomplete="off" placeholder="Type a message..." /><button>Send</button>
+    </form>
+</div>
 
 <script src="/socket.io/socket.io.js"></script>
 <script>
@@ -112,8 +196,9 @@
 
         messages.appendChild(item);
         // 새 메시지가 추가되면 스크롤을 맨 아래로 이동
-        window.scrollTo(0, document.body.scrollHeight);
+        messages.scrollTop = messages.scrollHeight;
     });
 </script>
+
 </body>
 </html>
