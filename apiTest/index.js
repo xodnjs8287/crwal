@@ -4,38 +4,90 @@ const path = require('path');
 const { Server } = require("socket.io");
 
 const app = express();
-const server = http.createServer(app); // Express 앱으로 http 서버 생성
-const io = new Server(server); // http 서버에 Socket.IO를 연결
+const server = http.createServer(app);
+const io = new Server(server);
 
-// Koyeb 포트 또는 기본 8080 포트 사용
 const port = process.env.PORT || 8080;
 
-// 'public' 디렉토리의 정적 파일(index.html)을 서비스합니다.
 app.use(express.static(path.join(__dirname, 'public')));
 
-// 새로운 사용자가 접속했을 때의 처리
+const animals = ["사자", "호랑이", "코끼리", "기린", "하마", "판다", "펭귄", "고양이", "강아지", "돌고래"];
+const users = {}; // 접속한 사용자 정보를 저장할 객체
+
+// --- 미니게임 상태 변수 ---
+let numberGame = {
+    isActive: false,
+    answer: null
+};
+// -------------------------
+
 io.on('connection', (socket) => {
-    console.log('✅ a user connected');
+    const randomAnimal = animals[Math.floor(Math.random() * animals.length)];
+    users[socket.id] = `익명의 ${randomAnimal}`;
+    console.log(`✅ ${users[socket.id]} connected`);
 
-    // 사용자 접속을 모든 클라이언트에게 알림 (한글로 변경)
-    io.emit('chat message', '데롱지가 입장했습니다.');
-
-    // 사용자가 연결을 끊었을 때의 처리
-    socket.on('disconnect', () => {
-        console.log('❌ user disconnected');
-        // 사용자 퇴장을 모든 클라이언트에게 알림 (한글로 변경)
-        io.emit('chat message', '데롱지가 퇴장했습니다.');
+    io.emit('chat message', {
+        type: 'system',
+        text: `${users[socket.id]}님이 입장했습니다.`
     });
 
-    // 'chat message' 이벤트를 수신했을 때의 처리
+    socket.on('disconnect', () => {
+        const disconnectedUser = users[socket.id];
+        if (disconnectedUser) {
+            console.log(`❌ ${disconnectedUser} disconnected`);
+            delete users[socket.id];
+            io.emit('chat message', {
+                type: 'system',
+                text: `${disconnectedUser}님이 퇴장했습니다.`
+            });
+        }
+    });
+
     socket.on('chat message', (msg) => {
-        // 받은 메시지를 모든 클라이언트에게 다시 전송
-        io.emit('chat message', msg);
-        console.log('message: ' + msg);
+        const nickname = users[socket.id];
+
+        // --- 미니게임 로직 ---
+        if (msg === '/숫자게임') {
+            if (numberGame.isActive) {
+                socket.emit('chat message', { type: 'system', text: '이미 숫자 맞추기 게임이 진행 중입니다.' });
+                return;
+            }
+            numberGame.isActive = true;
+            numberGame.answer = Math.floor(Math.random() * 100) + 1;
+            console.log(`🎮 Number game started! Answer: ${numberGame.answer}`);
+            io.emit('chat message', { type: 'system', text: '🎲 숫자 맞추기 게임을 시작합니다! 1부터 100 사이의 숫자를 입력해주세요.' });
+            return;
+        }
+
+        if (numberGame.isActive) {
+            const guess = parseInt(msg, 10);
+            if (!isNaN(guess)) {
+                if (guess === numberGame.answer) {
+                    io.emit('chat message', { type: 'system', text: `🎉 ${nickname}님이 정답(${numberGame.answer})을 맞췄습니다! 🎉` });
+                    numberGame.isActive = false;
+                    numberGame.answer = null;
+                } else if (guess < numberGame.answer) {
+                    io.emit('chat message', { type: 'system', text: `${nickname}님의 숫자: ${guess} -> UP! ⬆️` });
+                } else {
+                    io.emit('chat message', { type: 'system', text: `${nickname}님의 숫자: ${guess} -> DOWN! ⬇️` });
+                }
+                return;
+            }
+        }
+        // --- 미니게임 로직 끝 ---
+
+        // 일반 채팅 메시지 처리
+        const messageData = {
+            type: 'user',
+            nickname: nickname,
+            text: msg,
+            socketId: socket.id // 클라이언트로 보낸 사람의 ID를 함께 전송
+        };
+        io.emit('chat message', messageData);
+        console.log(`${nickname}: ${msg}`);
     });
 });
 
-// http 서버를 실행합니다. (app.listen 대신 server.listen 사용)
 server.listen(port, () => {
     console.log(`Chat server running on http://localhost:${port}`);
 });

@@ -168,17 +168,11 @@
 
 <script src="/socket.io/socket.io.js"></script>
 <script>
-    // JavaScript 로직은 이전과 동일합니다.
     const socket = io();
 
     const form = document.getElementById('form');
     const input = document.getElementById('input');
     const messages = document.getElementById('messages');
-
-    let myId = '';
-    socket.on('connect', () => {
-        myId = socket.id;
-    });
 
     form.addEventListener('submit', (e) => {
         e.preventDefault();
@@ -196,7 +190,6 @@
             item.classList.add('system');
         }
         else {
-            // 서버에서 보낸 닉네임과 내 소켓 ID를 비교하여 내가 보낸 메시지인지 확인
             if (socket.id === data.socketId) {
                 item.classList.add('my-message');
             } else {
