@@ -1,7 +1,7 @@
 {
-  "name": "koyeb-test-app",
+  "name": "koyeb-chat-app",
   "version": "1.0.0",
-  "description": "A simple Node.js test app for Koyeb",
+  "description": "A simple real-time chat app for Koyeb",
   "main": "index.js",
   "scripts": {
     "start": "node index.js"
@@ -9,6 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "express": "^4.19.2"
+    "express": "^4.19.2",
+    "socket.io": "^4.7.5"
   }
 }

@@ -1,17 +1,40 @@
 const express = require('express');
+const http = require('http');
 const path = require('path');
+const { Server } = require("socket.io");
 
 const app = express();
+const server = http.createServer(app); // Express 앱으로 http 서버 생성
+const io = new Server(server); // http 서버에 Socket.IO를 연결
 
-// Koyeb에서 제공하는 PORT 환경 변수를 사용하거나, 없을 경우 8080 포트를 사용합니다.
+// Koyeb 포트 또는 기본 8080 포트 사용
 const port = process.env.PORT || 8080;
 
-// 루트 경로 ('/')로 GET 요청이 오면 views/index.html 파일을 전송합니다.
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'views', 'index.html'));
+// 'public' 디렉토리의 정적 파일(index.html)을 서비스합니다.
+app.use(express.static(path.join(__dirname, 'public')));
+
+// 새로운 사용자가 접속했을 때의 처리
+io.on('connection', (socket) => {
+    console.log('✅ a user connected');
+
+    // 사용자 접속을 모든 클라이언트에게 알림
+    io.emit('chat message', 'A new user has joined the chat.');
+
+    // 사용자가 연결을 끊었을 때의 처리
+    socket.on('disconnect', () => {
+        console.log('❌ user disconnected');
+        io.emit('chat message', 'A user has left the chat.');
+    });
+
+    // 'chat message' 이벤트를 수신했을 때의 처리
+    socket.on('chat message', (msg) => {
+        // 받은 메시지를 모든 클라이언트에게 다시 전송
+        io.emit('chat message', msg);
+        console.log('message: ' + msg);
+    });
 });
 
-// 서버를 시작하고, 어떤 포트에서 실행 중인지 콘솔에 출력합니다.
-app.listen(port, () => {
-    console.log(`Server is running on port ${port}`);
+// http 서버를 실행합니다. (app.listen 대신 server.listen 사용)
+server.listen(port, () => {
+    console.log(`Chat server running on http://localhost:${port}`);
 });

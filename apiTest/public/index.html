@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Chat</title>
+    <style>
+        :root {
+            --border-color: #ddd;
+            --background-color: #f0f2f5;
+            --body-background: #fff;
+            --text-color: #050505;
+            --system-message-color: #888;
+        }
+        body {
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--background-color);
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+        #messages {
+            list-style-type: none;
+            margin: 0;
+            padding: 1rem;
+            flex-grow: 1;
+            overflow-y: auto;
+            background-color: var(--body-background);
+        }
+        #messages > li {
+            padding: 0.5rem 1rem;
+            word-wrap: break-word;
+        }
+        #messages > li:nth-child(odd) {
+            background: #f9f9f9;
+        }
+        /* 시스템 메시지 스타일 */
+        li.system {
+            font-style: italic;
+            color: var(--system-message-color);
+            text-align: center;
+            background: transparent !important;
+        }
+
+        #form {
+            background: var(--body-background);
+            padding: 1rem;
+            display: flex;
+            height: 3rem;
+            box-sizing: border-box;
+            border-top: 1px solid var(--border-color);
+        }
+        #input {
+            border: 1px solid var(--border-color);
+            padding: 0 1rem;
+            flex-grow: 1;
+            border-radius: 2rem;
+            margin-right: 1rem;
+        }
+        #input:focus {
+            outline: none;
+            border-color: #007bff;
+        }
+        #form > button {
+            background: #007bff;
+            border: none;
+            padding: 0 1.5rem;
+            color: white;
+            border-radius: 2rem;
+            cursor: pointer;
+        }
+        #form > button:hover {
+            background: #0056b3;
+        }
+    </style>
+</head>
+<body>
+<ul id="messages"></ul>
+<form id="form" action="">
+    <input id="input" autocomplete="off" placeholder="Type a message..." /><button>Send</button>
+</form>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+    // 서버에 연결
+    const socket = io();
+
+    const form = document.getElementById('form');
+    const input = document.getElementById('input');
+    const messages = document.getElementById('messages');
+
+    // 폼 제출 이벤트 처리
+    form.addEventListener('submit', (e) => {
+        e.preventDefault(); // 페이지 새로고침 방지
+        if (input.value) {
+            // 'chat message' 이벤트를 서버로 전송
+            socket.emit('chat message', input.value);
+            input.value = ''; // 입력창 초기화
+        }
+    });
+
+    // 서버로부터 'chat message' 이벤트를 수신
+    socket.on('chat message', (msg) => {
+        const item = document.createElement('li');
+        item.textContent = msg;
+
+        // 시스템 메시지(입장/퇴장)인 경우 특별한 스타일 적용
+        if (msg.includes('user has joined') || msg.includes('user has left')) {
+            item.classList.add('system');
+        }
+
+        messages.appendChild(item);
+        // 새 메시지가 추가되면 스크롤을 맨 아래로 이동
+        window.scrollTo(0, document.body.scrollHeight);
+    });
+</script>
+</body>
+</html>
