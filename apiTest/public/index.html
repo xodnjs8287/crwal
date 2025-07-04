@@ -3,23 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>간단 채팅</title>
+    <title>롱쟈 채팅</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro:wght@400;700&display=swap" rel="stylesheet">
+
     <style>
         :root {
-            --background-color: #f0f2f5;
-            --container-background: #ffffff;
-            --header-background: #007bff;
-            --system-message-color: #657786;
-            --message-bubble-background: #e9ebee;
-            --text-color: #050505;
-            --border-color: #ced4da;
-            --button-color: #007bff;
-            --button-hover-color: #0056b3;
+            /* IDE Dark Theme Color Palette */
+            --background-color: #282a36; /* 배경 */
+            --container-background: #21222c; /* 채팅창 배경 */
+            --header-background: #44475a; /* 헤더 */
+            --system-message-color: #6272a4; /* 시스템 메시지 */
+            --my-message-background: rgba(80, 250, 123, 0.15); /* 내 메시지 (초록색 계열) */
+            --other-message-background: rgba(139, 233, 253, 0.1); /* 다른 사람 메시지 (청록색 계열) */
+            --text-color: #f8f8f2; /* 기본 텍스트 */
+            --border-color: #44475a;
+            --button-color: #bd93f9; /* 버튼 (보라색 계열) */
+            --button-hover-color: #ff79c6; /* 버튼 호버 (핑크색 계열) */
+            --nickname-color: #8be9fd; /* 닉네임 (청록색) */
         }
 
         body {
             margin: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            /* 글꼴을 코드 글꼴로 변경 */
+            font-family: 'Source Code Pro', 'D2Coding', monospace;
             background-color: var(--background-color);
             display: flex;
             justify-content: center;
@@ -27,99 +35,104 @@
             height: 100vh;
         }
 
-        /* 전체 채팅 컨테이너 */
         .chat-container {
             width: 100%;
-            max-width: 800px; /* PC에서 최대 너비 제한 */
+            max-width: 800px;
             height: 100%;
-            max-height: 90vh; /* PC에서 최대 높이 제한 */
+            max-height: 90vh;
             display: flex;
             flex-direction: column;
             background: var(--container-background);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            border: 1px solid var(--border-color);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
             border-radius: 8px;
             overflow: hidden;
         }
 
-        /* 헤더 스타일 */
         .chat-header {
             background: var(--header-background);
-            color: white;
-            padding: 1rem;
+            color: var(--text-color);
+            padding: 0.8rem 1rem;
             text-align: center;
             font-weight: bold;
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             flex-shrink: 0;
+            border-bottom: 1px solid #000;
         }
 
-        /* 메시지 목록 스타일 */
         #messages {
             list-style-type: none;
             margin: 0;
             padding: 1rem;
             flex-grow: 1;
             overflow-y: auto;
+            display: flex;
+            flex-direction: column;
         }
 
-        /* 웹킷 브라우저용 스크롤바 꾸미기 */
-        #messages::-webkit-scrollbar {
-            width: 8px;
-        }
-        #messages::-webkit-scrollbar-track {
-            background: #f1f1f1;
-        }
-        #messages::-webkit-scrollbar-thumb {
-            background: #888;
-            border-radius: 4px;
-        }
-        #messages::-webkit-scrollbar-thumb:hover {
-            background: #555;
-        }
-
-        /* 각 메시지 버블 스타일 */
         #messages > li {
             padding: 0.6rem 1rem;
-            margin-bottom: 0.5rem;
-            border-radius: 18px;
-            max-width: 75%;
+            margin-bottom: 1rem;
+            border-radius: 8px;
+            max-width: 80%;
             word-wrap: break-word;
-            background: var(--message-bubble-background);
-            color: var(--text-color);
-            width: fit-content; /* 내용물 크기에 맞게 너비 조절 */
+            border-left: 3px solid; /* IDE의 라인 넘버 부분처럼 표현 */
         }
 
-        /* 시스템 메시지 스타일 */
-        li.system {
+        .my-message {
+            background: var(--my-message-background);
+            color: var(--text-color);
+            align-self: flex-end;
+            border-left-color: #50fa7b; /* 초록색 */
+        }
+
+        .other-message {
+            background: var(--other-message-background);
+            color: var(--text-color);
+            align-self: flex-start;
+            border-left-color: #8be9fd; /* 청록색 */
+        }
+
+        .nickname {
+            font-size: 0.8rem;
+            color: var(--nickname-color);
+            margin-bottom: 0.25rem;
+            font-weight: bold;
+        }
+
+        .system {
             font-style: italic;
             color: var(--system-message-color);
             text-align: center;
             background: transparent !important;
+            align-self: center;
             width: 100%;
-            max-width: 100%;
+            border: none;
         }
 
-        /* 입력 폼 스타일 */
         #form {
-            background: var(--container-background);
+            background: var(--header-background);
             padding: 1rem;
             display: flex;
-            border-top: 1px solid #e5e5e5;
+            border-top: 1px solid #000;
             flex-shrink: 0;
         }
 
         #input {
+            background-color: #282a36;
+            color: var(--text-color);
             border: 1px solid var(--border-color);
             padding: 0 1.2rem;
             flex-grow: 1;
             border-radius: 2rem;
             margin-right: 0.5rem;
             font-size: 1rem;
-            transition: border-color 0.2s ease-in-out;
+            font-family: inherit;
         }
-
         #input:focus {
             outline: none;
             border-color: var(--button-color);
+            box-shadow: 0 0 5px var(--button-color);
         }
 
         #form > button {
@@ -131,27 +144,15 @@
             cursor: pointer;
             font-size: 1rem;
             font-weight: bold;
+            font-family: inherit;
             transition: background-color 0.2s ease-in-out;
         }
+        #form > button:hover { background: var(--button-hover-color); }
 
-        #form > button:hover {
-            background: var(--button-hover-color);
-        }
-
-        /* 모바일 화면을 위한 반응형 디자인 */
         @media (max-width: 600px) {
-            body {
-                align-items: flex-start; /* 모바일에선 상단에 붙임 */
-            }
-            .chat-container {
-                max-width: 100%;
-                max-height: 100%;
-                height: 100vh;
-                border-radius: 0;
-            }
-            #input, #form > button {
-                font-size: 16px; /* 모바일에서 글자 크기가 작아지는 것 방지 */
-            }
+            body { align-items: flex-start; }
+            .chat-container { max-width: 100%; max-height: 100%; height: 100vh; border-radius: 0; border: none; }
+            #input, #form > button { font-size: 16px; }
         }
     </style>
 </head>
@@ -167,35 +168,50 @@
 
 <script src="/socket.io/socket.io.js"></script>
 <script>
-    // 서버에 연결
+    // JavaScript 로직은 이전과 동일합니다.
     const socket = io();
 
     const form = document.getElementById('form');
     const input = document.getElementById('input');
     const messages = document.getElementById('messages');
 
-    // 폼 제출 이벤트 처리
+    let myId = '';
+    socket.on('connect', () => {
+        myId = socket.id;
+    });
+
     form.addEventListener('submit', (e) => {
-        e.preventDefault(); // 페이지 새로고침 방지
+        e.preventDefault();
         if (input.value) {
-            // 'chat message' 이벤트를 서버로 전송
             socket.emit('chat message', input.value);
-            input.value = ''; // 입력창 초기화
+            input.value = '';
         }
     });
 
-    // 서버로부터 'chat message' 이벤트를 수신
-    socket.on('chat message', (msg) => {
+    socket.on('chat message', (data) => {
         const item = document.createElement('li');
-        item.textContent = msg;
 
-        // 시스템 메시지(입장/퇴장)인 경우 특별한 스타일 적용 (한글로 변경)
-        if (msg.includes('데롱지가 입장했습니다') || msg.includes('데롱지가 퇴장했습니다')) {
+        if (data.type === 'system') {
+            item.textContent = data.text;
             item.classList.add('system');
+        }
+        else {
+            // 서버에서 보낸 닉네임과 내 소켓 ID를 비교하여 내가 보낸 메시지인지 확인
+            if (socket.id === data.socketId) {
+                item.classList.add('my-message');
+            } else {
+                item.classList.add('other-message');
+                const nicknameDiv = document.createElement('div');
+                nicknameDiv.classList.add('nickname');
+                nicknameDiv.textContent = data.nickname;
+                item.appendChild(nicknameDiv);
+            }
+            const messageText = document.createElement('span');
+            messageText.textContent = data.text;
+            item.appendChild(messageText);
         }
 
         messages.appendChild(item);
-        // 새 메시지가 추가되면 스크롤을 맨 아래로 이동
         messages.scrollTop = messages.scrollHeight;
     });
 </script>
