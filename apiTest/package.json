@@ -1,0 +1,14 @@
+{
+  "name": "koyeb-test-app",
+  "version": "1.0.0",
+  "description": "A simple Node.js test app for Koyeb",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.19.2"
+  }
+}
