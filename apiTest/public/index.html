@@ -158,10 +158,10 @@
 <body>
 
 <div class="chat-container">
-    <header class="chat-header">간단 채팅</header>
+    <header class="chat-header">롱쟈 채팅</header>
     <ul id="messages"></ul>
     <form id="form" action="">
-        <input id="input" autocomplete="off" placeholder="메시지를 입력하세요..." /><button>전송</button>
+        <input id="input" autocomplete="off" placeholder="데롱지야 입력해라잉..." /><button>전송</button>
     </form>
 </div>
 
@@ -190,7 +190,7 @@
         item.textContent = msg;
 
         // 시스템 메시지(입장/퇴장)인 경우 특별한 스타일 적용 (한글로 변경)
-        if (msg.includes('사용자가 입장했습니다') || msg.includes('사용자가 퇴장했습니다')) {
+        if (msg.includes('데롱지가 입장했습니다') || msg.includes('데롱지가 퇴장했습니다')) {
             item.classList.add('system');
         }
 
